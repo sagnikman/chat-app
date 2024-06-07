@@ -18,4 +18,6 @@ router.post(
 
 router.post('/logout', UserController.logout);
 
+router.get('/', AuthMiddlewares.checkAuth, UserController.getUsersForSidebar);
+
 module.exports = router;

@@ -7,31 +7,39 @@ const userRepository = new UserRepository();
 
 async function createUser(data) {
     try {
-        if(data.gender === 'male') {
+        if (data.gender === 'male') {
             data.profilePicture = `https://avatar.iran.liara.run/public/boy?username=${data.username}`;
-        }
-        else if(data.gender === 'female') {
+        } else if (data.gender === 'female') {
             data.profilePicture = `https://avatar.iran.liara.run/public/girl?username=${data.username}`;
         }
         const user = await userRepository.create(data);
         return user;
     } catch (error) {
-        throw new AppError('Cannot create a new user', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError(
+            'Cannot create a new user',
+            StatusCodes.INTERNAL_SERVER_ERROR
+        );
     }
 }
 
 async function signin(data, res) {
     try {
         const user = await userRepository.getUserByUsername(data.username);
-        if(!user) {
-            throw new AppError('No user found for the given username', StatusCodes.NOT_FOUND);
+        if (!user) {
+            throw new AppError(
+                'No user found for the given username',
+                StatusCodes.NOT_FOUND
+            );
         }
         console.log(data.password, user.password);
         const passwordMatch = Auth.checkPassword(data.password, user.password);
-        if(!passwordMatch) {
+        if (!passwordMatch) {
             throw new AppError('Invalid password', StatusCodes.BAD_REQUEST);
         }
-        const jwt = Auth.createTokenAndSetCookie({id: user.id, username: user.username}, res);
+        const jwt = Auth.createTokenAndSetCookie(
+            { id: user.id, username: user.username },
+            res
+        );
         return jwt;
     } catch (error) {
         throw error;
@@ -40,42 +48,62 @@ async function signin(data, res) {
 
 async function isAuthenticated(token) {
     try {
-        if(!token) {
+        if (!token) {
             throw new AppError('Missing JWT token', StatusCodes.BAD_REQUEST);
         }
         const response = Auth.verifyToken(token);
         const user = await userRepository.get(response.id);
-        if(!user) {
+        if (!user) {
             throw new AppError('User not found', StatusCodes.NOT_FOUND);
         }
         return user.id;
     } catch (error) {
-        if(error instanceof AppError) throw error;
-        if(error.name == 'JsonWebTokenError') {
+        if (error instanceof AppError) throw error;
+        if (error.name == 'JsonWebTokenError') {
             throw new AppError('Invalid JWT token', StatusCodes.BAD_REQUEST);
         }
-        if(error.name == 'TokenExpiredError') {
+        if (error.name == 'TokenExpiredError') {
             throw new AppError('JWT token expired', StatusCodes.BAD_REQUEST);
         }
-        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError(
+            'Something went wrong',
+            StatusCodes.INTERNAL_SERVER_ERROR
+        );
     }
 }
 
 async function logout(data, res) {
     try {
         res.cookie('jwt', '', {
-            maxAge: 0
+            maxAge: 0,
         });
         return data.username;
     } catch (error) {
-        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError(
+            'Something went wrong',
+            StatusCodes.INTERNAL_SERVER_ERROR
+        );
     }
 }
 
+async function getUsersForSidebar(data) {
+    try {
+        const users = await userRepository.getUsersForSidebar(
+            data.loggedInUserId
+        );
+        return users;
+    } catch (error) {
+        Logger.error(
+            'Something went wrong in User Service: getUsersForSidebar'
+        );
+        throw error;
+    }
+}
 
 module.exports = {
     createUser,
     signin,
     isAuthenticated,
-    logout
-}
+    logout,
+    getUsersForSidebar,
+};
