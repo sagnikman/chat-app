@@ -18,13 +18,19 @@ const useSignup = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-            const responseData = response.json();
-            if (responseData.error) {
-                throw new Error(response.error);
+            const responseData = await response.json();
+            if (JSON.stringify(responseData.error) !== '{}') {
+                if (responseData.error.explanation) {
+                    throw new Error(responseData.error.explanation);
+                }
+                throw new Error(responseData.error);
             }
 
-            localStorage.setItem('auth-user', JSON.stringify(responseData));
-            setAuthUser(responseData);
+            localStorage.setItem(
+                'auth-user',
+                JSON.stringify(responseData.data)
+            );
+            setAuthUser(responseData.data);
         } catch (error) {
             toast.error(error.message);
         } finally {
