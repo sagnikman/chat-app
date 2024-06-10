@@ -13,19 +13,18 @@ const useSignup = () => {
         }
         setLoading(true);
         try {
-            const res = await fetch('/api/v1/user/signup', {
+            const response = await fetch('/api/v1/user/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-            const response = res.json();
-            if (response.error) {
+            const responseData = response.json();
+            if (responseData.error) {
                 throw new Error(response.error);
             }
 
-            localStorage.setItem('auth-user', JSON.stringify(response));
-
-            setAuthUser(data);
+            localStorage.setItem('auth-user', JSON.stringify(responseData));
+            setAuthUser(responseData);
         } catch (error) {
             toast.error(error.message);
         } finally {
