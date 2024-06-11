@@ -35,6 +35,10 @@ class MessageRepository extends CrudRepository {
             participants: { $all: [data.senderId, data.receiverId] },
         }).populate('messages');
 
+        if (conversation == null) {
+            return [];
+        }
+
         return conversation.messages;
     }
 }

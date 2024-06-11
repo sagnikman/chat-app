@@ -27,7 +27,7 @@ const useSendMessage = () => {
                 throw new Error(responseData.error);
             }
 
-            setMessages([...messages, responseData.data.message]);
+            setMessages([...messages, responseData.data]);
         } catch (error) {
             toast.error(error.message);
         } finally {
