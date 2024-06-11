@@ -19,7 +19,7 @@ function validateAuthRequest(req, res, next) {
                 .status(StatusCodes.BAD_REQUEST)
                 .json(ErrorResponse);
     }
-    if(req.body.password !== req.body.confirmPassword) {
+    if(req.body.confirmPassword && (req.body.password !== req.body.confirmPassword)) {
         ErrorResponse.message = 'Something went wrong while signup of new user';
         ErrorResponse.error = new AppError(['password and confirmPassword do not match in the incoming request'], StatusCodes.BAD_REQUEST);
         return res

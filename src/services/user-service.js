@@ -31,7 +31,6 @@ async function signin(data, res) {
                 StatusCodes.NOT_FOUND
             );
         }
-        console.log(data.password, user.password);
         const passwordMatch = Auth.checkPassword(data.password, user.password);
         if (!passwordMatch) {
             throw new AppError('Invalid password', StatusCodes.BAD_REQUEST);
@@ -40,7 +39,7 @@ async function signin(data, res) {
             { id: user.id, username: user.username },
             res
         );
-        return jwt;
+        return user;
     } catch (error) {
         throw error;
     }

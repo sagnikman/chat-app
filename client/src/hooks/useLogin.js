@@ -2,33 +2,34 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthContext } from '../context/AuthContext';
 
-const useSignup = () => {
+const useLogin = () => {
     const [loading, setLoading] = useState(false);
     const { setAuthUser } = useAuthContext();
 
-    const signup = async function (data) {
-        const success = handleInputValidation(data);
+    const login = async (username, password) => {
+        const success = handleInputValidation({ username, password });
         if (!success) {
             return;
         }
         setLoading(true);
         try {
-            const response = await fetch('/api/v1/user/signup', {
+            const response = await fetch('/api/v1/user/signin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ username, password }),
             });
             const responseData = await response.json();
-            if(responseData.data.password) {
+
+            if (responseData.data.password) {
                 delete responseData.data.password;
             }
+
             if (JSON.stringify(responseData.error) !== '{}') {
                 if (responseData.error.explanation) {
                     throw new Error(responseData.error.explanation);
                 }
                 throw new Error(responseData.error);
             }
-
             localStorage.setItem(
                 'auth-user',
                 JSON.stringify(responseData.data)
@@ -40,31 +41,14 @@ const useSignup = () => {
             setLoading(false);
         }
     };
-
-    return { loading, signup };
+    return { loading, login };
 };
 
-export default useSignup;
+export default useLogin;
 
 function handleInputValidation(data) {
-    if (
-        !data.fullName ||
-        !data.username ||
-        !data.password ||
-        !data.confirmPassword ||
-        !data.gender
-    ) {
+    if (!data.username || !data.password) {
         toast.error('Please fill all the fields');
-        return false;
-    }
-
-    if (data.password !== data.confirmPassword) {
-        toast.error('Passwords do not match');
-        return false;
-    }
-
-    if (data.password.length < 6) {
-        toast.error('Password must be at least 6 characters');
         return false;
     }
     return true;
