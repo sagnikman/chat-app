@@ -4,7 +4,9 @@
   "description": "TodoList APIs Project",
   "main": "index.js",
   "scripts": {
-    "dev": "npx nodemon src/index.js"
+    "dev": "npx nodemon src/index.js",
+    "start": "node src/index.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client"
   },
   "author": "Sagnik",
   "license": "ISC",
