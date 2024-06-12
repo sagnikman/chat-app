@@ -1,5 +1,6 @@
 const CrudRepository = require('./crud-repository');
 const { Message, Conversation } = require('../models');
+const { getReceiverSocketId, io } = require('../socket');
 
 class MessageRepository extends CrudRepository {
     constructor() {
@@ -23,9 +24,13 @@ class MessageRepository extends CrudRepository {
             conversation.messages.push(newMessage._id);
         }
 
-        //TODO: Socket IO Functionality
-
         await Promise.all([conversation.save(), newMessage.save()]);
+
+        const receiverSocketId = getReceiverSocketId(data.receiverId);
+
+        if (receiverSocketId != 'undefined') {
+            io.to(receiverSocketId).emit('newMessage', newMessage);
+        }
 
         return newMessage;
     }
